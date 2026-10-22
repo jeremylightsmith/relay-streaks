@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Streaks</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 32rem; margin: 0 auto; padding: 1rem; }
+      form { display: flex; gap: 0.5rem; }
+      input { flex: 1; font-size: 1rem; padding: 0.5rem; }
+      button { font-size: 1rem; padding: 0.5rem 1rem; }
+      #error { color: #b00020; min-height: 1.2em; }
+      ul { padding-left: 1.2rem; }
+      li { padding: 0.25rem 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Streaks</h1>
+    <h2 id="today-date"></h2>
+    <form id="add-habit">
+      <input id="habit-name" placeholder="New habit" required>
+      <button type="submit">Add</button>
+    </form>
+    <p id="error" role="alert"></p>
+    <ul id="today"></ul>
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>
