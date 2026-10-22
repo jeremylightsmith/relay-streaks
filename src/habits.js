@@ -11,3 +11,29 @@ export function addHabit(habits, name, now = new Date()) {
 export function todayList(habits) {
   return [...habits];
 }
+
+export function dayKey(now = new Date()) {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export function isDoneToday(habit, now = new Date()) {
+  return (habit.doneDates ?? []).includes(dayKey(now));
+}
+
+export function toggleDone(habits, id, now = new Date()) {
+  const key = dayKey(now);
+  return habits.map((h) => {
+    if (h.id !== id) return h;
+    const dates = h.doneDates ?? [];
+    const doneDates = dates.includes(key) ? dates.filter((k) => k !== key) : [...dates, key];
+    return { ...h, doneDates };
+  });
+}
+
+export function msUntilNextDay(now = new Date()) {
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return next - now;
+}
