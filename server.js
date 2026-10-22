@@ -42,6 +42,6 @@ export function createServer() {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const port = Number(process.env.PORT) || 3000;
+  const port = Number(process.env.PORT) || 3014;
   createServer().listen(port, () => console.log(`Streaks on http://localhost:${port}`));
 }
