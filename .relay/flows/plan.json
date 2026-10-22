@@ -1,7 +1,7 @@
 {
   "derived": {
-    "lands_on": "Plan:Done",
-    "pulls_from": "Backlog"
+    "lands_on": "Plan:Review",
+    "pulls_from": "Next up"
   },
   "edges": [
     {
@@ -30,7 +30,7 @@
       "reads": [
         "description"
       ],
-      "run": "Plan card {ref} so the Implement flow can build it. Don't write code.\n\n1. Read the card: `{relay} card {ref}`. If something important is unclear, ask a human and stop.\n2. Write a short plan: what we're building, how, and how we'll know it works. Save it: `{relay} plan {ref} @<file>`.\n3. Split the work into 1-5 tasks, in build order. Each task says what to build and which tests prove it. The implementer sees only its own task.\n4. Replace the card's tasks. Remove the old ones (`{relay} tasks list {ref} --json`, then `{relay} task rm {ref} <id>`), then add the new ones in one call: `{relay} tasks add {ref} --task \"<title>\" @<file> --task \"<title>\" @<file> ...`.\n5. Check them: `{relay} tasks list {ref}`.",
+      "run": "Plan card {ref} so the Implement flow can build it. Don't write code.\n\n1. Read the card: `{relay} card {ref}`. Answers to earlier questions are in its comments.\n2. Ask before you plan. List every decision you would otherwise guess: what the user sees, edge cases, scope, and any technical choice the repo doesn't already settle. Ask them all in one batch, then stop. Skip this only if the card and the repo answer everything.\n3. Write a short plan: what we're building, how, and how we'll know it works. Save it: `{relay} plan {ref} @<file>`.\n4. Split the work into 1-5 tasks, in build order. Each task says what to build and which tests prove it. The implementer sees only its own task.\n5. Replace the card's tasks. Remove the old ones (`{relay} tasks list {ref} --json`, then `{relay} task rm {ref} <id>`), then add the new ones in one call: `{relay} tasks add {ref} --task \"<title>\" @<file> --task \"<title>\" @<file> ...`.\n6. Check them: `{relay} tasks list {ref}`.",
       "type": "agent",
       "writes": [
         "plan",
@@ -42,5 +42,5 @@
   "trigger": {
     "stage": "Plan"
   },
-  "version": 1
+  "version": 3
 }
