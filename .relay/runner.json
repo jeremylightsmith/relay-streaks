@@ -1,0 +1,36 @@
+// Relay runner config — read by `./relay start`. Lines starting with // are comments.
+// Docs: relay.md. Every key is optional; a missing key falls back to the runner's default.
+{
+  // Prefix for this project's worktrees under .claude/worktrees/ and for the runner lock.
+  // Must differ between projects that share a machine.
+  "namespace": "relay-streaks",
+  // How many node-jobs run at once, per isolation class: `shared_clean` jobs share one
+  // read-only checkout; `exclusive` jobs each get their own worktree.
+  "capacity": {
+    "shared_clean": 3,
+    "exclusive": 2
+  },
+  // The ref every pool worktree is created at and reset to. Change it for a repo on `master`,
+  // a fork tracking `upstream/main`, etc.
+  "base": "origin/main",
+  // This project's LLM skill dir / pointer file; `./relay update --skill-dir/--pointer-file` changes them.
+  "skill_dir": ".claude/skills",
+  "pointer_file": "CLAUDE.md",
+  // Scratch cache handed to worktree hooks as RELAY_CACHE_DIR.
+  "cache_dir": "~/.cache/relay/relay-streaks",
+  // Per-worktree lifecycle hooks, run when a worktree is prepared / cleaned up
+  // (e.g. install deps, create a test DB). Uncomment once the script exists and is executable.
+  // "worktrees": {
+  //   "prepare": ".relay/prepare-worktree.sh"
+  // },
+  // How many failed runs' worktrees to keep on disk for inspection.
+  "max_retained_failed": 3,
+  // Long-poll wait (seconds) when asking the board for work.
+  "poll_timeout": 25,
+  // Seconds between heartbeats to the board.
+  "heartbeat_interval": 15,
+  // Re-install ./relay from the board when a newer one is served, between jobs.
+  "auto_update": true,
+  // Minimum seconds between auto-update attempts.
+  "auto_update_min_interval": 300
+}
