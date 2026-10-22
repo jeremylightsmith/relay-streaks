@@ -1,0 +1,46 @@
+{
+  "derived": {
+    "lands_on": "Plan:Done",
+    "pulls_from": "Backlog"
+  },
+  "edges": [
+    {
+      "from": "start",
+      "to": "write_plan"
+    },
+    {
+      "from": "write_plan",
+      "on": "succeeded",
+      "to": "done"
+    },
+    {
+      "from": "write_plan",
+      "on": "failed",
+      "to": "needs_input"
+    }
+  ],
+  "enabled": false,
+  "isolation": "shared_clean",
+  "key": "plan",
+  "nodes": [
+    {
+      "key": "write_plan",
+      "llm": "Claude Opus",
+      "max_retries": 1,
+      "reads": [
+        "description"
+      ],
+      "run": "Plan card {ref} so the Implement flow can build it. Don't write code.\n\n1. Read the card: `{relay} card {ref}`. If something important is unclear, ask a human and stop.\n2. Write a short plan: what we're building, how, and how we'll know it works. Save it: `{relay} plan {ref} @<file>`.\n3. Split the work into 1-5 tasks, in build order. Each task says what to build and which tests prove it. The implementer sees only its own task.\n4. Replace the card's tasks. Remove the old ones (`{relay} tasks list {ref} --json`, then `{relay} task rm {ref} <id>`), then add the new ones in one call: `{relay} tasks add {ref} --task \"<title>\" @<file> --task \"<title>\" @<file> ...`.\n5. Check them: `{relay} tasks list {ref}`.",
+      "type": "agent",
+      "writes": [
+        "plan",
+        "tasks"
+      ]
+    }
+  ],
+  "problem": null,
+  "trigger": {
+    "stage": "Plan"
+  },
+  "version": 1
+}

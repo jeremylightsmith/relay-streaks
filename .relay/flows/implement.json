@@ -1,0 +1,171 @@
+{
+  "derived": {
+    "lands_on": "Review",
+    "pulls_from": "Plan:Done"
+  },
+  "edges": [
+    {
+      "from": "start",
+      "to": "branch"
+    },
+    {
+      "from": "branch",
+      "on": "succeeded",
+      "to": "implement_task"
+    },
+    {
+      "from": "implement_task",
+      "on": "succeeded",
+      "to": "review_task"
+    },
+    {
+      "from": "review_task",
+      "max_loops": 3,
+      "on": "failed",
+      "to": "fix_task"
+    },
+    {
+      "from": "fix_task",
+      "on": "succeeded",
+      "to": "review_task"
+    },
+    {
+      "from": "review_task",
+      "on": "succeeded",
+      "to": "implement_task",
+      "when": "foreach_remaining"
+    },
+    {
+      "from": "review_task",
+      "on": "succeeded",
+      "to": "review_card",
+      "when": "foreach_exhausted"
+    },
+    {
+      "from": "review_card",
+      "max_loops": 3,
+      "on": "partial",
+      "to": "implement_task"
+    },
+    {
+      "from": "review_card",
+      "on": "succeeded",
+      "to": "publish"
+    },
+    {
+      "from": "publish",
+      "on": "succeeded",
+      "to": "post_results"
+    },
+    {
+      "from": "post_results",
+      "on": "succeeded",
+      "to": "done"
+    },
+    {
+      "from": "branch",
+      "on": "failed",
+      "to": "needs_input"
+    },
+    {
+      "from": "implement_task",
+      "on": "failed",
+      "to": "needs_input"
+    },
+    {
+      "from": "fix_task",
+      "on": "failed",
+      "to": "needs_input"
+    },
+    {
+      "from": "review_card",
+      "on": "failed",
+      "to": "needs_input"
+    },
+    {
+      "from": "publish",
+      "on": "failed",
+      "to": "needs_input"
+    },
+    {
+      "from": "post_results",
+      "on": "failed",
+      "to": "needs_input"
+    }
+  ],
+  "enabled": false,
+  "isolation": "exclusive",
+  "key": "implement",
+  "nodes": [
+    {
+      "key": "branch",
+      "run": "{relay} git-fetch && git checkout -B {branch} origin/main && {relay} branch {ref} {branch}",
+      "type": "shell",
+      "writes": [
+        "branch"
+      ]
+    },
+    {
+      "effort": "high",
+      "expects_commits": true,
+      "foreach": "card.tasks",
+      "key": "implement_task",
+      "llm": "Claude Opus",
+      "max_retries": 1,
+      "reads": [
+        "tasks"
+      ],
+      "run": "Build task {task_id} (\"{task}\") of card {ref}, and only that task.\n\n1. Read it: `{relay} task show {ref} {task_id}`.\n2. Write a failing test, then make it pass.\n3. Run `npm test`.\n4. Commit with the message \"{ref}: {task}\".\n\nAlready built? Declare succeeded with `--no-changes`.",
+      "type": "agent"
+    },
+    {
+      "key": "review_task",
+      "llm": "Claude Opus",
+      "reads": [
+        "tasks"
+      ],
+      "role": "check",
+      "run": "Review task {task_id} (\"{task}\") of card {ref}. Don't change anything.\n\n1. Read the task: `{relay} task show {ref} {task_id}`.\n2. Run `npm test`.\n3. Read its commits: `git log -p origin/main..HEAD` (the newest ones are this task's).\n\nFail if the tests fail, or the task is missing, wrong or untested. List each problem as `file:line`: problem. Otherwise succeed.",
+      "type": "agent"
+    },
+    {
+      "expects_commits": true,
+      "key": "fix_task",
+      "llm": "Claude Sonnet",
+      "reads": [
+        "tasks"
+      ],
+      "run": "Task {task_id} (\"{task}\") of card {ref} failed review. The findings are below.\n\nFix each one, run `npm test`, and commit. The task is at `{relay} task show {ref} {task_id}`.",
+      "type": "agent"
+    },
+    {
+      "key": "review_card",
+      "llm": "Claude Opus",
+      "role": "check",
+      "run": "Every task of card {ref} is built and reviewed. Review the whole branch against the card. Don't change any code.\n\nRead `{relay} card {ref}`, `{relay} tasks list {ref}` and `git diff origin/main...HEAD`.\n\nNothing worth fixing? Succeed.\nOtherwise add one task per problem, in one call: `{relay} tasks add {ref} --task \"<title>\" @<file> ...`. Each says what to fix and which test proves it. Then run `{relay} outcome partial --detail \"<what you added>\"`, which sends the card back to build the new tasks.",
+      "type": "agent"
+    },
+    {
+      "key": "publish",
+      "run": "git push -u origin {branch} --force-with-lease && url=$(gh pr view {branch} --json url -q .url || gh pr create --fill --head {branch}) && {relay} pr {ref} \"$url\"",
+      "type": "shell",
+      "writes": [
+        "pr_url"
+      ]
+    },
+    {
+      "key": "post_results",
+      "llm": "Claude Sonnet",
+      "run": "Tell the human reviewer what card {ref} changed. Read the card and `git log origin/main..HEAD`.\n\nWrite a JSON file like `{\"summary\": \"- what to try first\", \"changes\": [\"Adds ...\"]}` and save it: `{relay} result {ref} @<file>`.",
+      "type": "agent",
+      "writes": [
+        "ai_result"
+      ]
+    }
+  ],
+  "problem": null,
+  "trigger": {
+    "stage": "Implement"
+  },
+  "version": 1
+}
